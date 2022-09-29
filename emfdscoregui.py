@@ -7,77 +7,52 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from emfdscore.scoring import score_docs 
 
-#template_input = pd.read_csv('emfdscore/template_input.csv', header=None)
-#template_input.head()
-
-
 def readInput():
     input = pd.read_csv(inPath.get() or 'emfdscore/template_input.csv', header=None)
     return input
     
-# def score_output():
-#     num_docs = len(template_input)
-#     DICT_TYPE = 'emfd'
-#     PROB_MAP = 'all'
-#     SCORE_METHOD = 'bow'
-#     OUT_METRICS = 'sentiment'
-#     OUT_CSV_PATH = 'test-1.csv'
-
-#     df = score_docs(template_input,DICT_TYPE,PROB_MAP,SCORE_METHOD,OUT_METRICS,num_docs)
-#     df.to_csv(OUT_CSV_PATH, index=False)
-    
 def score_args():
-    #setOutputFileName()
+    
     template_input1 = readInput()
     num_docs = len(template_input1)
+
+    setOutputFilenameVar(filename)
+
+    scoreOptionsVar_ = ''
+    if (scoreOptionsVar.get() == 'gdelt.ngrams'):
+        scoreOptionsVar_ = 'gdelt'
+    else:
+        scoreOptionsVar_ = scoreOptionsVar.get()
 
     DICT_TYPE = dictTypeVar.get() or 'emfd'
     PROB_MAP = probMapVar.get() or 'all'
     SCORE_METHOD = scoreOptionsVar.get() or 'bow'
     OUT_METRICS = sentimentOptionsVar.get() or 'sentiment'
     OUT_CSV_PATH = outputFileNameVar.get() or 'default-file-output.csv'
-    scoreOptionsVar_ = ''
-    if (scoreOptionsVar.get() == 'gdelt.ngrams'):
-        scoreOptionsVar_ = 'gdelt'
-    else:
-        scoreOptionsVar_ = scoreOptionsVar.get()
-        
+    
+    df = score_docs(template_input1,DICT_TYPE,PROB_MAP,SCORE_METHOD,OUT_METRICS,num_docs)
+    df.to_csv(OUT_CSV_PATH, index=False)
+
+def browseFiles():
+    global filename
+    filename = tk.filedialog.askopenfilename(initialdir = "/",
+                                          title = "Select a CSV File to score",
+                                          filetypes = (("CSV files",
+                                                        "*.csv"),
+                                                       ("all files",
+                                                        "*.*")))
+    inPath.set(filename)
+    #setOutPutFileNameVar(filename)
+
+def setOutputFilenameVar(filename):
     filenameSplitList = filename.split('/')
-    inputFileNameVar.set(filenameSplitList[-1])
     outputFileNameVar.set(filenameSplitList[-1].split('.')[0] 
                           + '-' + dictTypeVar.get() 
                           + '-' + probMapVar.get() 
                           + '-' + scoreOptionsVar.get()
                           + '-' +  sentimentOptionsVar.get() 
                           + '.csv')
-
-    df = score_docs(template_input1,DICT_TYPE,PROB_MAP,SCORE_METHOD,OUT_METRICS,num_docs)
-    df.to_csv(OUT_CSV_PATH, index=False)
-
-
-
-#remove
-import pathlib
- 
-# current working directory
-#print(pathlib.Path().absolute())
-
-
-##TODO:
-###
-###File i/o
-######Select output dir
-###Generate CL arg
-###Status Bar with paths
-###Make files not have to be in root
-
-#Defaults
-# dictType = 'emfd'
-# PROB_MAP = 'all'
-# SCORE_METHOD = 'bow'
-# OUT_METRICS = 'sentiment'
-# OUT_CSV_PATH = 'all-sent.csv'
-
+    
 #Create main window
 root = tk.Tk()
 root.title("eMFD Score")
@@ -162,33 +137,12 @@ sentimentOptionsDrop.grid(column=2, row=0, padx=12,pady=1)
 #Select Input CSV File
 #######################
 
-#######Frame for file select
+#Frame for file select
 fileFrame = tk.LabelFrame(root)
 fileFrame.grid(column=0)
 
 #Variable holding filename that will be passed to the eMFD Score script
-inputFileNameVar = tk.StringVar()
 outputFileNameVar = tk.StringVar()
-
-def browseFiles():
-    global filename
-    filename = tk.filedialog.askopenfilename(initialdir = "/",
-                                          title = "Select a CSV File to score",
-                                          filetypes = (("CSV files",
-                                                        "*.csv"),
-                                                       ("all files",
-                                                        "*.*")))
-    filenameSplitList = filename.split('/')
-    inputFileNameVar.set(filenameSplitList[-1])
-    outputFileNameVar.set(filenameSplitList[-1].split('.')[0] 
-                          + '-' + dictTypeVar.get() 
-                          + '-' + probMapVar.get() 
-                          + '-' + scoreOptionsVar.get()
-                          + '-' +  sentimentOptionsVar.get() 
-                          + '.csv')
-    inPath.set(filename)
-
-    
 
 browsebutton = tk.Button(fileFrame, text = 'Browse for input file ', command = browseFiles)
 browsebutton.grid(sticky='w',column=0,row=0)

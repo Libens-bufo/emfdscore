@@ -1,18 +1,26 @@
-import tkinter as tk
-from tkinter import filedialog
 
+#For the interface
+import tkinter as tk
+from tkinter import W, filedialog
+
+#These are the typical data science libraries needed for eMFDScore
 import pandas as pd 
 import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
 from emfdscore.scoring import score_docs 
 
+
+########################
+# Functions
+########################
+
+#Pandas reads in the csv selected or the default
 def readInput():
     input = pd.read_csv(inPath.get() or 'emfdscore/template_input.csv', header=None)
     return input
     
 def score_args():
-    
     template_input1 = readInput()
     num_docs = len(template_input1)
 
@@ -33,6 +41,7 @@ def score_args():
     df = score_docs(template_input1,DICT_TYPE,PROB_MAP,SCORE_METHOD,OUT_METRICS,num_docs)
     df.to_csv(OUT_CSV_PATH, index=False)
 
+
 def browseFiles():
     global filename
     filename = tk.filedialog.askopenfilename(initialdir = "/",
@@ -42,7 +51,30 @@ def browseFiles():
                                                        ("all files",
                                                         "*.*")))
     inPath.set(filename)
-    #setOutPutFileNameVar(filename)
+
+    trimmedFilename = trimFilename(filename)
+
+    statusBar = tk.Label(statusFrame, text = "Path:" + (trimmedFilename or 'No file selected'), relief='sunken', anchor=W) #Status bar
+    statusBar.grid(column=0,row=4)
+
+def trimFilename(filename):
+    
+    limit = 25
+    array = list(filename)
+    trimmedFilename = ''
+
+    if len(filename) < limit:
+        return filename
+    
+    for i in range(len(array) - 1, 0, -1):
+        if len(trimmedFilename) < limit:
+            trimmedFilename = array[i] +trimmedFilename 
+
+    return "..." + trimmedFilename
+        
+
+
+    
 
 def setOutputFilenameVar(filename):
     filenameSplitList = filename.split('/')
@@ -52,6 +84,10 @@ def setOutputFilenameVar(filename):
                           + '-' + scoreOptionsVar.get()
                           + '-' +  sentimentOptionsVar.get() 
                           + '.csv')
+
+########################
+# GUI
+########################
     
 #Create main window
 root = tk.Tk()
@@ -150,33 +186,33 @@ browsebutton.grid(sticky='w',column=0,row=0)
 inPath = tk.StringVar()
 entry1 = tk.Entry(fileFrame, textvariable = inPath)
 entry1.grid(column=1,row=0)
+
 ########################
 #Choose output directory and set output filename
 ########################
 
+#Feature removed
 
-###############  
-#Current Options
-################
-# currentOptionsFrame = tk.LabelFrame(root, text="Current options")
-# currentOptionsFrame.grid()
-# def updateFunc():
-    
-#     label1= tk.Label(
-#     currentOptionsFrame,
-#     text=outputFileNameVar.get()+ filename)
-#     label1.grid(row=1)
-  
-#     return  
+########################
+# Status Bar
+########################
 
-# updateButton= tk.Button(currentOptionsFrame, text="updateFunc()", command=lambda: updateFunc())
-# updateButton.grid(row=0)
+statusFrame = tk.LabelFrame(root).grid(column=0) #Frame where the label lives
+
+filePath = tk.StringVar()
+filePath.set(inPath.get() or " ")
+
+statusBar = tk.Label(statusFrame, text = "Path:" + 'No file selected', relief='sunken', anchor=W) #Status bar
+
+statusBar.grid(column=0,row=4)
+
+
 ####################
 #Score Button
 ####################
 
 scoreButton = tk.Button(root, text='Score', command=lambda:score_args())
-scoreButton.grid(pady=3)
+scoreButton.grid(column =0, row=3, pady=3)
 
 #Begin event loop
 tk.mainloop()

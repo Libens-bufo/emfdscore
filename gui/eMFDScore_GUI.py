@@ -106,7 +106,7 @@ root.geometry("335x210")
 dictTypeVar = tk.StringVar()
 dictTypeOptions = [
   ('extended Moral Foundations Dictionary (eMFD)', 'emfd'),
-  ('Moral Foundations Dicitonary 2.0','mfd2'),
+  ('Moral Foundations Dictionary 2.0','mfd2'),
   ('original Moral Foundations Dictionary', 'mfd')
 ]
 
